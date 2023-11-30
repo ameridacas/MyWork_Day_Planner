@@ -21,37 +21,49 @@
 //
 // TODO: Add code to display the current date in the header of the page.
 //});
-$(function () {
-  $(".saveBtn").click(function () {
-    var text = $(this).siblings("textarea").val();
-    var time = $(this).parent().attr("id");
-    localStorage.setItem(time, text);
+$(document).ready(function () {
+  $("#currentDay").text(dayjs().format("dddd, MMM D"));//displays the current time and date in the header
+
+  // Function to set time-block colors
+  function setColors() {
+    var currentHour = dayjs().hour();
+
+    // Loop through each time-block
+    $(".time-block").each(function () {
+      var blockHour = parseInt($(this).attr("id").split("-")[1]);
+
+      // Removes the class from each time-block past present future 
+      $(this).removeClass("past present future");
+
+      // Add new class based on the current hour
+      if (blockHour < currentHour) {
+        $(this).addClass("past");
+      } else if (blockHour === currentHour) {
+        $(this).addClass("present");
+      } else {
+        $(this).addClass("future");
+      }
+    });
+  }
+  //callback to set colors
+  setColors();
+
+  // click event for saveButton
+  $(".saveBtn").on("click", function () {
+    var hour = $(this).parent().attr("id");
+    var description = $(this).siblings(".description").val();
+
+    // Saves the time and description to local storage
+    localStorage.setItem(hour, description);
   });
 
-  var currentHour = dayjs().hour();
-
+  // Load saved tasks from local storage
   $(".time-block").each(function () {
-    var blockHour = parseInt($(this).attr("id").split("-")[1]);
+    var hour = $(this).attr("id");
+    var description = localStorage.getItem(hour);
 
-    $(this).removeClass("past present future");
-
-    if (blockHour < currentHour) {
-      $(this).addClass("past");
-    } else if (blockHour === currentHour) {
-      $(this).addClass("present");
-    } else {
-      $(this).addClass("future");
+    if (description) {
+      $(this).children(".description").val(description);
     }
   });
-
-  $(".time-block").each(function () {
-    var id = $(this).attr("id");
-    var value = localStorage.getItem(id);
-
-    if (value !== null) {
-      $(this).children("textarea").val(value);
-    }
-  });
-
-  $("#currentDay").text(dayjs().format('MMMM D, YYYY'));
-});
+});;
